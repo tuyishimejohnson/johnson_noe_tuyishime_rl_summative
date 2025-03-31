@@ -1,0 +1,7 @@
+PyOpenGL 
+PyOpenGL_accelerate
+numpy
+stable-baselines3[extra]
+matplotlib
+torch
+opencv-python
