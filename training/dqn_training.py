@@ -1,13 +1,15 @@
+# Import necessary libraries
 import gym
 import torch
 from stable_baselines3 import DQN
 from environment.custom_env import SmartIrrigationEnv
+from stable_baselines3.common.evaluation import evaluate_policy
 
 # Create the environment
 env = SmartIrrigationEnv()
 
 # Define the DQN model
-model = DQN(
+dqn_model = DQN(
     "MlpPolicy",  # Use a Multi-Layer Perceptron policy
     env,
     learning_rate=0.001,  # Adjust learning rate
@@ -21,11 +23,15 @@ model = DQN(
     tensorboard_log="logs/dqn/"
 )
 
+# Evaluate the model before training
+mean_reward, _ = evaluate_policy(dqn_model, env, n_eval_episodes=10)
+print(f"[DQN] Mean Reward: {mean_reward}")
+
 # Train the agent
-model.learn(total_timesteps=50000)
+dqn_model.learn(total_timesteps=500_000)
 
 # Save the trained model
-model.save("models/dqn/smart_irrigation_dqn")
+dqn_model.save("models/dqn/smart_irrigation_dqn")
 
 env.close()
 

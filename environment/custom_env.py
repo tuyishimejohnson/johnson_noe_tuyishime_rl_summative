@@ -3,77 +3,67 @@ from gym import spaces
 import numpy as np
 
 class SmartIrrigationEnv(gym.Env):
-    """
-    Custom Gym Environment for Smart Irrigation System
-    """
     def __init__(self):
         super(SmartIrrigationEnv, self).__init__()
-        
-        # State space: [Soil Moisture, Weather Forecast, Crop Stage, Water Availability]
+
+        # State space: Soil Moisture, Weather, Crop Stage, Water Availability
         self.observation_space = spaces.MultiDiscrete([3, 3, 4, 4])
         
-        # Action space (Discrete: 4 actions)
-        self.action_space = spaces.Discrete(4)  # [Full Irrigation, Partial, Delay, Stop]
-        
+        # Actions: Full, Partial, Delay, Stop
+        self.action_space = spaces.Discrete(4)
+
         # Initial state
-        self.state = np.array([1, 1, 0, 3])  # Medium Moisture, Dry Weather, Seeding Stage, Sufficient Water
-        
-        self.done = False
+        self.state = np.array([1, 1, 0, 3])  # Medium Moisture, Dry, Seeding, Sufficient Water
         self.steps = 0
-        self.max_steps = 50  # End episode after 50 steps
-        
+        self.max_steps = 50
+        self.done = False
+
     def step(self, action):
-        """
-        Executes action and returns new state, reward, done, info
-        """
-        soil_moisture, weather, crop_stage, water_level = self.state
+        soil, weather, stage, water = self.state
         reward = 0
 
-        # Define action effects
-        if action == 0:  # Full Irrigation
-            soil_moisture = min(2, soil_moisture + 2)
-            water_level = max(0, water_level - 2)
-        elif action == 1:  # Partial Irrigation
-            soil_moisture = min(2, soil_moisture + 1)
-            water_level = max(0, water_level - 1)
-        elif action == 2:  # Delayed Irrigation (No change)
-            pass
-        elif action == 3:  # Stop Irrigation
-            pass
+        # Action effects
+        if action == 0:  # Full
+            soil = min(2, soil + 2)
+            water = max(0, water - 2)
+        elif action == 1:  # Partial
+            soil = min(2, soil + 1)
+            water = max(0, water - 1)
+        elif action == 2:  # Delay
+            soil = max(0, soil - 1) if weather == 1 else soil  # dry weather causes loss
+        elif action == 3:  # Stop
+            soil = max(0, soil - 1)
 
-        # Reward Calculation
-        if soil_moisture == 1:
-            reward = 10  # Optimal irrigation
-        elif soil_moisture == 0 or soil_moisture == 2:
-            reward = -5  # Over/Under Irrigation
+        # Reward logic
+        if soil == 1:
+            reward = 10
+        elif soil == 0 or soil == 2:
+            reward = -5
         else:
-            reward = -10  # Water wasted or stress
+            reward = -10
 
-        # Crop Growth Progression
-        if self.steps % 10 == 0 and crop_stage < 3:
-            crop_stage += 1
+        # Crop progression every 10 steps
+        if self.steps % 10 == 0 and stage < 3:
+            stage += 1
 
-        # Check if the episode is over
-        if crop_stage == 3 or water_level == 0 or self.steps >= self.max_steps:
+        # Terminal Conditions
+        if water == 0 or stage == 3 or self.steps >= self.max_steps:
             self.done = True
 
-        # Update state
-        self.state = np.array([soil_moisture, weather, crop_stage, water_level])
+        self.state = np.array([soil, weather, stage, water])
         self.steps += 1
-        
+
         return self.state, reward, self.done, {}
-    
+
     def reset(self):
-        """Resets environment to initial state."""
-        self.state = np.array([1, 1, 0, 3])  # Reset state
-        self.done = False
+        self.state = np.array([1, 1, 0, 3])
         self.steps = 0
+        self.done = False
         return self.state
-    
+
     def render(self, mode='human'):
-        """Renders environment state in console (for debugging)."""
-        print(f"Soil Moisture: {self.state[0]}, Weather: {self.state[1]}, Crop Stage: {self.state[2]}, Water Level: {self.state[3]}")
-    
+        soil, weather, stage, water = self.state
+        print(f"Step {self.steps} | Soil: {soil}, Weather: {weather}, Stage: {stage}, Water: {water}")
+
     def close(self):
-        """Closes environment."""
         pass
