@@ -21,4 +21,4 @@ This project simulates a smart irrigation system using reinforcement learning al
 
 Use this command to install dependencies: 
 
-```pip install -r requirements.txt
+`pip install -r requirements.txt`
