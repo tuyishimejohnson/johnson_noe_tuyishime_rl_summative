@@ -13,7 +13,7 @@ dqn_model = DQN(
     env,
     learning_rate=0.001,
     gamma=0.99,
-    buffer_size=50000,
+    buffer_size=10000,
     batch_size=64,
     exploration_fraction=0.1,
     exploration_final_eps=0.05,
