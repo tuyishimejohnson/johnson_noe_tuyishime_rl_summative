@@ -18,6 +18,11 @@ class SmartIrrigationEnv(gym.Env):
         self.max_steps = 50
         self.done = False
 
+
+    def render(self, mode='human'):
+        """Render the environment using OpenGL."""
+        display()
+
     def step(self, action):
         soil, weather, stage, water = self.state
 
@@ -146,6 +151,12 @@ def keyboard(key, x, y):
         sys.exit()
 
 # === Main Launcher ===
+
+def render(self, mode='human'):
+    """Render the environment using OpenGL."""
+    glutMainLoopEvent()
+    display()
+
 def main():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
